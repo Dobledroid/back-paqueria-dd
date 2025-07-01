@@ -66,15 +66,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Manejo de rutas no encontradas
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Ruta no encontrada',
-    path: req.originalUrl
-  });
-});
-
 // Manejo de errores global
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', error);
@@ -83,6 +74,15 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
     success: false,
     message: error.message || 'Error interno del servidor',
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  });
+});
+
+// Manejo de rutas no encontradas (debe ir al final)
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Ruta no encontrada',
+    path: req.originalUrl
   });
 });
 

@@ -39,6 +39,23 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/gastos', gastoRoutes);
 
+// Ruta raíz principal
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend Paquetería DD funcionando correctamente',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    status: 'online',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      reports: '/api/reports',
+      gastos: '/api/gastos'
+    }
+  });
+});
+
 // Ruta de prueba
 app.get('/api/health', (req, res) => {
   res.json({

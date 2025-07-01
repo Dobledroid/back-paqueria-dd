@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.local
+dist
+.git
+README.md
+*.md
+src
+!api

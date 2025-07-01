@@ -1,7 +1,4 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export class Database {
   private static instance: Database;
@@ -23,14 +20,10 @@ export class Database {
     }
 
     try {
-      const mongoUri = process.env.MONGODB_URI;
+      const mongoUri = 'mongodb+srv://20210680:20210680@paqueteria-dd.j90aohq.mongodb.net/paqueteria-dd?retryWrites=true&w=majority';
       
-      if (!mongoUri) {
-        throw new Error('MONGODB_URI is not defined in environment variables');
-      }
-
       await mongoose.connect(mongoUri, {
-        dbName: process.env.DB_NAME || 'paqueteria-dd',
+        dbName: 'paqueteria-dd',
       });
 
       this.isConnected = true;

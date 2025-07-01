@@ -32,14 +32,7 @@ export const authenticateToken = async (
       return;
     }
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      res.status(500).json({
-        success: false,
-        message: 'JWT secret not configured'
-      });
-      return;
-    }
+    const jwtSecret = 'paqueteria_dd_secret_key_development_2024';
 
     // Verificar el token
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };

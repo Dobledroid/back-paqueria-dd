@@ -116,13 +116,9 @@ export class AuthController {
 
   // Método privado para generar token JWT
   private static generateToken(userId: string): string {
-    const jwtSecret = process.env.JWT_SECRET;
-    const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const jwtSecret = 'paqueteria_dd_secret_key_development_2024';
+    const jwtExpiresIn = '7d';
 
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET not configured');
-    }
-
-    return jwt.sign({ userId }, jwtSecret, { expiresIn: jwtExpiresIn as any });
+    return jwt.sign({ userId }, jwtSecret, { expiresIn: jwtExpiresIn });
   }
 }

@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { connectDB } from './config/database';
 
 // Importar rutas
@@ -10,11 +9,8 @@ import authRoutes from './routes/authRoutes';
 import reportRoutes from './routes/reportRoutes';
 import gastoRoutes from './routes/gastoRoutes';
 
-// Configurar variables de entorno
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3010;
+const PORT = 3010;
 
 // Middlewares globales
 app.use(helmet()); // Seguridad HTTP headers
@@ -72,8 +68,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
   
   res.status(error.status || 500).json({
     success: false,
-    message: error.message || 'Error interno del servidor',
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    message: error.message || 'Error interno del servidor'
   });
 });
 
@@ -86,14 +81,12 @@ app.use('*', (req, res) => {
   });
 });
 
-// Iniciar servidor solo si no estamos en Vercel
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
-    console.log(`📊 API Health: http://localhost:${PORT}/api/health`);
-    console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
-    console.log(`📦 Reports API: http://localhost:${PORT}/api/reports`);
-  });
-}
+// Iniciar servidor
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
+  console.log(`📊 API Health: http://localhost:${PORT}/api/health`);
+  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
+  console.log(`📦 Reports API: http://localhost:${PORT}/api/reports`);
+});
 
 export default app;

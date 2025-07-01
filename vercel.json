@@ -4,12 +4,28 @@
     {
       "src": "api/**/*.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/health",
+      "dest": "/api/health"
+    },
+    {
+      "src": "/api/auth/(.*)",
+      "dest": "/api/auth"
+    },
+    {
+      "src": "/api/reports/(.*)",
+      "dest": "/api/reports"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/index.js"
     }
   ],
   "env": {

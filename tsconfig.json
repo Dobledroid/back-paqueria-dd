@@ -22,8 +22,7 @@
     "noImplicitOverride": true
   },
   "include": [
-    "src/**/*",
-    "api/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

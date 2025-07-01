@@ -5,12 +5,13 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "dev:vercel": "vercel dev",
     "seed": "ts-node src/scripts/seed.ts",
     "lint": "eslint src/**/*.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "postinstall": "npm run build"
   },
   "keywords": [
     "nodejs",

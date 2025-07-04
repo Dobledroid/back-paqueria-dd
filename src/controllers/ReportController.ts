@@ -75,10 +75,10 @@ export class ReportController {
         data: {
           reports,
           pagination: {
-            current: pageNumber,
-            total: Math.ceil(total / limitNumber),
-            count: reports.length,
-            totalRecords: total
+            currentPage: pageNumber,
+            totalPages: Math.ceil(total / limitNumber),
+            totalItems: total,
+            itemsPerPage: limitNumber
           }
         }
       });

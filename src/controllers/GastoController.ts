@@ -59,11 +59,9 @@ export class GastoController {
           gastos,
           pagination: {
             currentPage: page,
-            totalPages,
+            totalPages: totalPages,
             totalItems: total,
-            itemsPerPage: limit,
-            hasNext: page < totalPages,
-            hasPrev: page > 1
+            itemsPerPage: limit
           }
         }
       });

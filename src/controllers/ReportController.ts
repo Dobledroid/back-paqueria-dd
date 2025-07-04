@@ -4,6 +4,78 @@ import { AuthRequest } from '../middleware/auth';
 import moment from 'moment';
 
 export class ReportController {
+  /**
+   * Marca los reportes de la página con los flags de conjunto y detecta conjuntos abiertos/cerrados.
+   * Modifica el array de reports recibido agregando los flags isConjunto, isInicioConjunto, isFinConjunto.
+   * Devuelve los flags conjuntoAbiertoAlInicio y conjuntoAbiertoAlFinal para la página.
+   */
+  static async marcarConjuntosEnPagina({
+    reports,
+    filters,
+    sortOptions,
+    pageNumber,
+    limitNumber
+  }: {
+    reports: any[],
+    filters: any,
+    sortOptions: any,
+    pageNumber: number,
+    limitNumber: number
+  }): Promise<{ conjuntoAbiertoAlInicio: boolean, conjuntoAbiertoAlFinal: boolean }> {
+    // 1. Buscar si la página anterior terminó con un conjunto abierto
+    let conjuntoAbiertoAlInicio = false;
+    if (pageNumber > 1) {
+      const hastaPrevLimit = (pageNumber - 1) * limitNumber;
+      if (hastaPrevLimit > 0) {
+        const hastaPrev = await Report.find(filters)
+          .sort(sortOptions)
+          .skip(0)
+          .limit(hastaPrevLimit);
+        let dentroDeConjunto = false;
+        for (const item of hastaPrev) {
+          const comentario = (item.comentarioPedido || '').toLowerCase();
+          if (comentario.includes('#inicio#')) {
+            dentroDeConjunto = true;
+          } else if (comentario.includes('#fin#') && dentroDeConjunto) {
+            dentroDeConjunto = false;
+          }
+        }
+        conjuntoAbiertoAlInicio = dentroDeConjunto;
+      }
+    }
+
+    // 2. Marcar los reportes de la página actual según conjunto
+    let dentroDeConjunto = conjuntoAbiertoAlInicio;
+    let conjuntoActual: any[] = [];
+    let conjuntoAbiertoAlFinal = false;
+    for (let i = 0; i < reports.length; i++) {
+      const item = reports[i];
+      const comentario = (item.comentarioPedido || '').toLowerCase();
+      item.isConjunto = false;
+      item.isInicioConjunto = false;
+      item.isFinConjunto = false;
+      if (comentario.includes('inicio')) {
+        dentroDeConjunto = true;
+        item.isInicioConjunto = true;
+        conjuntoActual = [item];
+      } else if (comentario.includes('fin') && dentroDeConjunto) {
+        dentroDeConjunto = false;
+        item.isFinConjunto = true;
+        conjuntoActual.push(item);
+        conjuntoActual.forEach((el: any) => (el.isConjunto = true));
+        conjuntoActual = [];
+      } else if (dentroDeConjunto) {
+        conjuntoActual.push(item);
+      }
+    }
+    // Si termina la página y hay un conjunto abierto, marcarlo
+    if (dentroDeConjunto && conjuntoActual.length > 0) {
+      conjuntoActual.forEach((el) => (el.isConjunto = true));
+      conjuntoAbiertoAlFinal = true;
+    }
+    return { conjuntoAbiertoAlInicio, conjuntoAbiertoAlFinal };
+  }
+
   // Obtener reportes para la tabla de paquetería (con paginación)
   static async getReports(req: AuthRequest, res: Response): Promise<void> {
     try {
@@ -61,15 +133,26 @@ export class ReportController {
       sortOptions[sortBy as string] = sortOrder === 'asc' ? 1 : -1;
 
       // Obtener reportes
-      const reports = await Report.find(filters)
+      const reportsDocs = await Report.find(filters)
         .populate('usuarioCreador', 'name email')
         .sort(sortOptions)
         .skip(skip)
         .limit(limitNumber);
+      // Convertir a objetos planos para poder agregar flags temporales
+      const reports = reportsDocs.map((doc) => doc.toObject());
 
       // Contar total de documentos para paginación
       const total = await Report.countDocuments(filters);
-      
+
+      // Lógica de conjuntos delegada al método especializado
+      const { conjuntoAbiertoAlInicio, conjuntoAbiertoAlFinal } = await ReportController.marcarConjuntosEnPagina({
+        reports,
+        filters,
+        sortOptions,
+        pageNumber,
+        limitNumber
+      });
+
       res.status(200).json({
         success: true,
         data: {
@@ -79,7 +162,9 @@ export class ReportController {
             totalPages: Math.ceil(total / limitNumber),
             totalItems: total,
             itemsPerPage: limitNumber
-          }
+          },
+          conjuntoAbiertoAlInicio,
+          conjuntoAbiertoAlFinal
         }
       });
     } catch (error) {
